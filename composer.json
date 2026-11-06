@@ -1,0 +1,16 @@
+{
+    "name": "uplifthub-bootcamp/secaware-api",
+    "description": "JSON API for SecAware, a cybersecurity-awareness learning platform.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "ext-pdo": "*",
+        "ext-pdo_sqlite": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SecAware\\": "src/"
+        }
+    }
+}
