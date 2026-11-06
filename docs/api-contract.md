@@ -78,7 +78,7 @@ A learner calling an admin endpoint gets a 403. Without a valid token, any signe
 
 - `name`: 1-100 characters after trimming.
 - `email`: a valid address. It is stored in lowercase, so `A@example.com` and `a@example.com` are the same account.
-- `password`: 12-72 bytes. It is never stored or logged, only its hash.
+- `password`: 15-72 bytes. It is never stored or logged, only its hash.
 - Any other field, including `role`, is ignored.
 
 `201`:
@@ -162,7 +162,7 @@ Learners and the public see published courses only. An unpublished course return
         "title": "Why passwords get stolen",
         "blocks": [
           { "type": "h2", "text": "It is rarely a lucky guess" },
-          { "type": "p", "text": "Most stolen passwords come from another site's data breach." },
+          { "type": "p", "text": "Many stolen passwords come from another site's data breach." },
           { "type": "tip", "text": "Use a different password on every site." }
         ]
       }
