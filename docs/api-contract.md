@@ -318,6 +318,8 @@ An unknown code returns `404 not_found`. A certificate stays valid and listed if
 
 No endpoint can create an admin. The first one comes from running `php bin/make-admin.php <email>` with access to the server.
 
+Approved courses are loaded with `php bin/import-content.php <folder>`, run with access to the server. It imports every file or none, using the same rules as the endpoints below, and ends with each course published. A course with any learner record (a completed lesson, an attempt or a certificate) must match its file exactly, or the whole import is refused. A course with no learner records is replaced from its file, keeping its `id` and first `published_at`.
+
 Admin endpoints use numeric IDs, and they can see unpublished courses. Lessons and questions in these responses include the same fields as the learner endpoints, and options also include `is_correct`.
 
 ### Courses
