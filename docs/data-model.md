@@ -103,6 +103,8 @@ CREATE TABLE certificates (
 CREATE INDEX certificates_course_id ON certificates (course_id);
 ```
 
+The migration runner also keeps its own `schema_migrations` table, recording which migrations have run.
+
 ## Rules the schema protects
 
 | Rule | How |

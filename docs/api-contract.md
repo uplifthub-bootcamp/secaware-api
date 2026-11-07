@@ -29,6 +29,8 @@ A failed response wraps its details in `error`. The `fields` key appears only wh
 
 Clients should act on `code` and show `message`.
 
+`OPTIONS` on any path returns `204` with no body, for local CORS preflights. A wrong method on a real path returns `404 not_found`. `Content-Type` is not checked.
+
 | Status | `code` | When |
 | --- | --- | --- |
 | 400 | `invalid_json` | The body is not a JSON object |
@@ -129,7 +131,7 @@ Learners and the public see published courses only. An unpublished course return
 
 ### `GET /api/courses`
 
-`200`, sorted by title:
+`200`, sorted by title, ignoring capitals:
 
 ```json
 {
@@ -216,7 +218,7 @@ Errors: `401 unauthenticated`, and `404 not_found` if the lesson does not exist 
 }
 ```
 
-`best_score` is `null` until the user submits an attempt.
+`best_score` is `null` and `passed` is `false` until the user submits an attempt.
 
 ## Quizzes
 
@@ -310,9 +312,11 @@ Anyone with the code can check a certificate. It shows the learner's name, but n
 }
 ```
 
-An unknown code returns `404 not_found`. Codes are 16 uppercase hex characters from `random_bytes(8)`, so they cannot be guessed.
+An unknown code returns `404 not_found`. A certificate stays valid and listed if its course is later unpublished, because the learner earned it. Codes are 16 uppercase hex characters from `random_bytes(8)`, so they cannot be guessed.
 
 ## Admin
+
+No endpoint can create an admin. The first one comes from running `php bin/make-admin.php <email>` with access to the server.
 
 Admin endpoints use numeric IDs, and they can see unpublished courses. Lessons and questions in these responses include the same fields as the learner endpoints, and options also include `is_correct`.
 
@@ -327,11 +331,11 @@ Admin endpoints use numeric IDs, and they can see unpublished courses. Lessons a
 | `POST /api/admin/courses/{id}/publish` | | `200`: the course |
 | `POST /api/admin/courses/{id}/unpublish` | | `200`: the course |
 
-- `slug`: unique lowercase letters, digits and hyphens, up to 100 characters. It cannot change once created.
+- `slug`: unique lowercase letters, digits and hyphens, up to 100 characters. A repeated slug returns `422 validation_failed`. It cannot change once created, so a `slug` sent to `PATCH` is ignored.
 - `title`: 1-150 characters.
 - `summary`: 1-500 characters.
 - `pass_mark`: a whole number from 1 to 100.
-- Publishing a course with no lessons or no questions returns `422 validation_failed`.
+- Publishing a course with no lessons or no questions returns `422 validation_failed`. Publishing twice returns `200` and keeps the first `published_at`.
 
 ### Lessons
 
@@ -355,7 +359,9 @@ Admin endpoints use numeric IDs, and they can see unpublished courses. Lessons a
 
 - `prompt`: 1-500 characters.
 - `position`: a whole number from 1, unique within the course.
-- `options`: 2-6 items, each with `text` (1-300 characters) and `is_correct`. Exactly one must be correct.
+- `options`: 2-6 items, each with `text` (1-300 characters) and `is_correct`. Exactly one must be correct. Their order sets each option's position.
+
+All text fields are trimmed before their lengths are checked.
 
 ### Changing a published course
 
@@ -364,6 +370,9 @@ To keep past attempts meaningful, these return `409 course_published` while the 
 - Deleting a lesson or question
 - Adding a question
 - Changing a question's `options`
+- Changing the course's `pass_mark`, because saved attempts and certificates were judged against it
+
+The usual checks come first: signing in, then finding the record, then a `422` for a bad body, then this `409`.
 
 Learner records must keep their meaning, so these return `409 in_use`, even while the course is unpublished:
 
